@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html data-require="math graphie math-format interactive subhints">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Waveform synthesis</title>
+    <script src="../khan-exercise.js"></script>
+    <script type="text/javascript">
+        function decFrac( num ) {
+            return KhanUtil.decimalFraction( num, true, true, true );
+        }
+    </script>
+</head>
+<body>
+    <div class="exercise">
+        <div class="vars">
+
+            <var id="PIXVSCALE">75</var>
+            <var id="PIXHSCALE">500/4</var>
+
+
+            <!-- this is the distance between grid lines -->
+            <var id="HSTEP">0.25</var>
+            <var id="VSTEP">0.25</var>
+
+            <!-- this is how many grid lines are between each tick mark -->
+            <var id="HTICKSTEP">4</var>
+            <var id="VTICKSTEP">4</var>
+
+            <!-- this is how many ticks there are between each grid label -->
+            <var id="HLABELSTEP">1</var>
+            <var id="VLABELSTEP">1</var>
+            
+            <!-- make sure the initial situation isn't the correct solution 
+            	  and that at least one component is nonzero -->
+            <div data-ensure="ANSWER2 * ANSWER3 * ANSWER4 !== 1/64 &amp;&amp; ANSWER2 + ANSWER3 + ANSWER4 !== 0">
+					<var id="ANSWER1">1</var>
+					<var id="ANSWER2">randRange(0,4)/4</var>
+					<var id="ANSWER3">randRange(0,3)/4</var>         
+					<var id="ANSWER4">randRange(0,3)/4</var>         
+				</div>
+
+        </div>
+
+        <div class="problems">
+            <div>
+
+                <div class="problem">
+                	  <p> The sound from any real instrument is a combination of 
+                	  harmonics or overtones. Each overtone is a sine wave
+                	  whose frequency is an integer multiple of the original note,
+                	  called the fundamental.
+                	  For example, if you play a middle C (256 Hz), the sound you 
+                	  get is a combination of that 256 Hz fundamental tone, along with softer
+                	  tones at 512 Hz, 768 Hz, 1024 Hz, and even higher. The volume
+                	  of these overtones 
+                	  <a href="#" class="show-definition" data-definition="instruments">
+                	  depends on the instrument you are playing</a>.</p>
+                	  
+	              	  <div class="definition" id="instruments">
+	              	  The relative amplitude of these overtones is one of the factors
+	              	  that make different
+	              	  instruments sound different. A tuning fork, for instance,
+	              	  produces only the fundamental tone with almost no overtones, while
+	              	  most string instruments such as the violin produce the first few
+	              	  harmonics at around 1/2 to 3/4 the volume of the fundamental. 
+	              	  Many woodwinds, such as the flute and oboe, sound the second and third
+	              	  harmonics even louder than the fundamental!</div>
+
+
+                    <p class="question">Here, the fundamental wave is drawn in gray, while the
+                    second, third, and fourth harmonics are drawn in blue. The 
+                    orange curve represents the
+                    actual sound, the sum of the blue and gray waves. Drag the 
+                    blue points to change the amplitude of the components. Try
+                    to make the orange curve match the green curve.</p>
+                    <div id="graph" class="graphie">
+                        graphInit({
+                            range: [ [-1,3],[-3,3]],
+                            scale: [ PIXHSCALE, PIXVSCALE ],
+                            axisArrows: "->",
+                            gridStep: [ HSTEP, VSTEP],
+                            tickStep: [ HTICKSTEP, VTICKSTEP ],
+                            labelStep: [ HLABELSTEP, VLABELSTEP ],
+                            unityLabels: true,
+                        });
+
+								addMouseLayer();
+		
+								// add points
+								graph.harmonic1 = addMovablePoint({
+				                coord: [ 1 , 1 ],
+				                snapX: 0.5,
+				                snapY: 0.25,
+				                visible: false,
+				                normalStyle: {
+				                    stroke: KhanUtil.GRAY,
+				                    fill: KhanUtil.GRAY
+				                },
+				                constraints: {fixed: true}
+				            });
+				            
+								graph.harmonic2 = addMovablePoint({
+				                coord: [ 1/2 , 0.25 ],
+				                snapX: 0.5,
+				                snapY: 0.25,
+				                normalStyle: {
+				                    stroke: KhanUtil.BLUE,
+				                    fill: KhanUtil.BLUE
+				                },
+				                constraints: {constrainX: true}
+				            });
+								
+								graph.harmonic3 = addMovablePoint({
+				                coord: [ 1/3 , 0.25 ],
+				                snapX: 0.5,
+				                snapY: 0.25,
+				                normalStyle: {
+				                    stroke: KhanUtil.BLUE,
+				                    fill: KhanUtil.BLUE
+				                },
+				                constraints: {constrainX: true}
+				            });
+				        		
+								graph.harmonic4 = addMovablePoint({
+				                coord: [ 1/4 , 0.25 ],
+				                snapX: 0.5,
+				                snapY: 0.25,
+				                normalStyle: {
+				                    stroke: KhanUtil.BLUE,
+				                    fill: KhanUtil.BLUE
+				                },
+				                constraints: {constrainX: true}
+				            });
+
+				            graph.harmonic2.onMove = function( x, y ) {
+				            	 if (y < 0) return false;
+				            	 if (y > 1) return false;
+				                graph.harmonic2.coord = [ x, y ];
+				                graph.drawCurve2();
+				                graph.drawSum();
+				            };
+				            graph.harmonic3.onMove = function( x, y ) {
+				            	 if (y < 0) return false;
+				            	 if (y > 1) return false;
+				                graph.harmonic3.coord = [ x, y ];
+				                graph.drawCurve3();
+				                graph.drawSum();
+				            };
+				            
+				            graph.harmonic4.onMove = function( x, y ) {
+				            	 if (y < 0) return false;
+				            	 if (y > 1) return false;
+				                graph.harmonic4.coord = [ x, y ];
+				                graph.drawCurve4();
+				                graph.drawSum();
+				            };
+				            
+								graph.curve1 = bogusShape;
+								graph.curve2 = bogusShape;
+								graph.curve3 = bogusShape;
+								graph.curve4 = bogusShape;
+								graph.sum = bogusShape;
+								graph.answer = bogusShape;
+								
+				            graph.drawCurve1 = function() {
+				                graph.curve1.remove();
+				                style({
+				                    stroke: KhanUtil.GRAY
+				                }, function() {
+				                    graph.curve1 = plot( function( x ) {
+				                        return graph.harmonic1.coord[1] * sin(PI/2 * x);
+				                    }, [ -1, 3] );
+				                    graph.curve1.toBack();
+				                });
+				            };
+				            
+				            graph.drawCurve2 = function() {
+				                graph.curve2.remove();
+				                style({
+				                    stroke: KhanUtil.BLUE,
+				                    opacity: 0.5
+				                }, function() {
+				                    graph.curve2 = plot( function( x ) {
+				                        return graph.harmonic2.coord[1] * sin(PI/2 * 2*x);
+				                    }, [ -1, 3] );
+				                    graph.curve2.toBack();
+				                });
+				            };
+				            
+				            graph.drawCurve3 = function() {
+				                graph.curve3.remove();
+				                style({
+				                    stroke: KhanUtil.BLUE,
+				                    opacity: 0.5
+				                }, function() {
+				                    graph.curve3 = plot( function( x ) {
+				                        return graph.harmonic3.coord[1] * sin(PI/2 * 3*x);
+				                    }, [ -1, 3] );
+				                    graph.curve3.toBack();
+				                });
+				            };
+				            
+				            graph.drawCurve4 = function() {
+				                graph.curve4.remove();
+				                style({
+				                    stroke: KhanUtil.BLUE,
+				                    opacity: 0.5
+				                }, function() {
+				                    graph.curve4 = plot( function( x ) {
+				                        return graph.harmonic4.coord[1] * sin(PI/2 * 4*x);
+				                    }, [ -1, 3] );
+				                    graph.curve4.toBack();
+				                });
+				            };
+
+				            graph.drawSum = function() {
+				                graph.sum.remove();
+				                style({
+				                    stroke: KhanUtil.ORANGE,
+				                    strokeDasharray: "-"
+				                }, function() {
+				                    graph.sum = plot( function( x ) {
+				                        return graph.harmonic1.coord[1] * sin(PI/2 * x) + 
+				                        		 graph.harmonic2.coord[1] * sin(PI/2 * 2*x) +
+				                        		 graph.harmonic3.coord[1] * sin(PI/2 * 3*x) +
+				                        		 graph.harmonic4.coord[1] * sin(PI/2 * 4*x);
+				                    }, [ -1, 3] );
+				                    graph.sum.toBack();
+				                    graph.answer.toBack();
+				                });
+				            };
+
+				            graph.drawAnswer = function() {
+				                graph.answer.remove();
+				                style({
+				                    stroke: KhanUtil.GREEN
+				                }, function() {
+				                    graph.answer = plot( function( x ) {
+				                        return ANSWER1 * sin(PI/2 * x) + 
+				                        		 ANSWER2 * sin(PI/2 * 2*x) +
+				                        		 ANSWER3 * sin(PI/2 * 3*x) +
+				                        		 ANSWER4 * sin(PI/2 * 4*x);
+				                    }, [ -1, 3] );
+				                    graph.answer.toBack();
+				                });
+				            };
+
+                        graph.drawAnswer();
+
+								graph.drawCurve1();
+                        graph.drawCurve2();
+                        graph.drawCurve3();
+                        graph.drawCurve4();
+                        graph.drawSum();
+                        
+                        graph.showSolution = function() {
+				                $( "html, body" ).animate({
+				                    scrollTop: $( ".question" ).offset().top
+				                }, {
+				                    duration: 500,
+				                    easing: "swing",
+				                    complete: function() {
+			                        	graph.harmonic2.moveTo(1/2, ANSWER2);
+			                        	graph.harmonic3.moveTo(1/3, ANSWER3);
+			                        	graph.harmonic4.moveTo(1/4, ANSWER4);
+			                        	
+			                       }
+			                   });
+                        };
+                        
+                    </div>
+                </div>
+
+                
+                <div class="solution" data-type="custom"><div style="font-size: 11px;">
+                	<div class="instruction">
+                		Drag the points to set the amplitude of each component wave to the right value.
+                	</div>
+                	<div class="guess"> [graph.harmonic2.coord, graph.harmonic3.coord, graph.harmonic4.coord]</div>
+                	<div class="validator-function"> 
+                		if (guess[0][1] == 1/4 &amp;&amp; guess[1][1] == 1/4 &amp;&amp; guess[2][1] == 1/4) return "";
+                		return (guess[0][1] == ANSWER2) &amp;&amp; (guess[1][1] == ANSWER3) &amp;&amp; (guess[2][1] == ANSWER4);
+                	</div>
+                	<div class="show-guess">
+                		graph.harmonic2.coord = guess[0];
+                		graph.harmonic3.coord = guess[1];
+                		graph.harmonic4.coord = guess[2];
+                		
+                		graph.drawCurve2();
+                		graph.drawCurve3();
+                		graph.drawCurve4();
+                		graph.drawSum();
+                	</div>
+                </div></div>
+            </div>
+        </div>
+
+        <div class="hints">
+ 
+ 				<div>
+ 					<p>Try looking at the spots where most of the harmonics are zero.
+ 					In particular, the second and fourth harmonics are both zero at
+ 					1, so you can use the value of the green curve there to find
+ 					the right value for the third harmonic.</p>
+                    <div class="graphie" data-update="graph">
+                        style({
+                            stroke: KhanUtil.RED,
+                            opacity: 0.5
+                        }, function() {
+                        	 var value = 1 - ANSWER3;
+                            line( [ 1, 0 ], [ 1, value] ).toBack();
+                        });
+                    </div>
+ 					
+ 				</div>
+ 				
+ 				<div>
+ 					<p>Once you know the third harmonic is right, look at 0.5, where the
+ 					fourth harmonic is zero, to find the right amplitude for the
+ 					second harmonic.</p>
+                    <div class="graphie" data-update="graph">
+                        style({
+                            stroke: KhanUtil.RED,
+                            opacity: 0.5
+                        }, function() {
+                        	 var value = sin(PI/2 * 0.5) + ANSWER2*sin(PI/2 * 2*0.5) + ANSWER3*sin(PI/2 * 3*0.5);
+                            line( [ 0.5, 0 ], [ 0.5, value] ).toBack();
+                        });
+                    </div>
+ 				</div>
+ 				
+ 				<div>
+ 					<p class="final-answer">Finally you can adjust the fourth harmonic until the orange curve
+ 					perfectly matches the green one.
+               <br /><input type="button" value="Show me" onClick="javascript:KhanUtil.currentGraph.graph.showSolution();" />
+ 					</p>
+ 				</div>
+ 
+       </div>
+    </div>
+</body>
+</html>
